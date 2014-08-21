@@ -12,7 +12,7 @@ define(function(require, exports, module) {
     var EventHandler = require('./EventHandler');
     var Transform = require('./Transform');
 
-    var usePrefix = document.createElement('div').style.webkitTransform !== undefined;
+    var usePrefix = ('webkitTransform' in document.documentElement);
     var devicePixelRatio = window.devicePixelRatio || 1;
 
     /**

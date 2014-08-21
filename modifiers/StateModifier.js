@@ -39,6 +39,7 @@ define(function(require, exports, module) {
         this._alignState = new Transitionable([0, 0]);
         this._sizeState = new Transitionable([0, 0]);
         this._proportionsState = new Transitionable([0, 0]);
+        this._differentialsState = new Transitionable([0, 0]);
 
         this._modifier = new Modifier({
             transform: this._transformState,
@@ -46,13 +47,15 @@ define(function(require, exports, module) {
             origin: null,
             align: null,
             size: null,
-            proportions: null
+            proportions: null,
+            differentials: null
         });
 
         this._hasOrigin = false;
         this._hasAlign = false;
         this._hasSize = false;
         this._hasProportions = false;
+        this._hasDifferentials = false;
 
         if (options) {
             if (options.transform) this.setTransform(options.transform);
@@ -61,6 +64,7 @@ define(function(require, exports, module) {
             if (options.align) this.setAlign(options.align);
             if (options.size) this.setSize(options.size);
             if (options.proportions) this.setProportions(options.proportions);
+            if (options.differentials) this.setDifferentials(options.differentials);
         }
     }
 
@@ -198,7 +202,7 @@ define(function(require, exports, module) {
      * @param {Function} callback callback to call after transition completes
      * @return {StateModifier} this
      */
-    StateModifier.prototype.setProportions = function setSize(proportions, transition, callback) {
+    StateModifier.prototype.setProportions = function setProportions(proportions, transition, callback) {
         if (proportions === null) {
             if (this._hasProportions) {
                 this._modifier.proportionsFrom(null);
@@ -215,6 +219,33 @@ define(function(require, exports, module) {
     };
 
     /**
+     * Set the differentials of this modifier, either statically or
+     *   through a provided Transitionable.
+     *
+     * @method setdifferentials
+     *
+     * @param {Array.Number} differentials two element array with differential pixel values.
+     * @param {Transitionable} transition Valid transitionable object
+     * @param {Function} callback callback to call after transition completes
+     * @return {StateModifier} this
+     */
+    StateModifier.prototype.setDifferentials = function setDifferentials(differentials, transition, callback) {
+        if (differentials === null) {
+            if (this._hasDifferentials) {
+                this._modifier.differentialsFrom(null);
+                this._hasDifferentials = false;
+            }
+            return this;
+        }
+        else if (!this._hasDifferentials) {
+            this._hasDifferentials = true;
+            this._modifier.differentialsFrom(this._differentialsState);
+        }
+        this._differentialsState.set(differentials, transition, callback);
+        return this;
+    };
+
+    /**
      * Stop the transition.
      *
      * @method halt
@@ -226,6 +257,7 @@ define(function(require, exports, module) {
         this._alignState.halt();
         this._sizeState.halt();
         this._proportionsState.halt();
+        this._differentialsState.halt();
     };
 
     /**
@@ -289,13 +321,23 @@ define(function(require, exports, module) {
     };
 
     /**
-     * Get the current state of the propportions component.
+     * Get the current state of the proportions component.
      *
      * @method getProportions
      * @return {Object} size provider object
      */
     StateModifier.prototype.getProportions = function getProportions() {
         return this._hasProportions ? this._proportionsState.get() : null;
+    };
+
+    /**
+     * Get the current state of the differentials component.
+     *
+     * @method getDifferentials
+     * @return {Object} size provider object
+     */
+    StateModifier.prototype.getDifferentials = function getDifferentials() {
+        return this._hasDifferentials ? this._differentialsState.get() : null;
     };
 
     /**

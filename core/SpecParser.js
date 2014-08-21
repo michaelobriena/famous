@@ -138,7 +138,7 @@ define(function(require, exports, module) {
             }
             if (spec.align) align = spec.align;
 
-            if (spec.size || spec.proportions) {
+            if (spec.size || spec.proportions || spec.differentials) {
                 var parentSize = size;
                 size = [size[0], size[1]];
 
@@ -151,6 +151,12 @@ define(function(require, exports, module) {
                     if (spec.proportions[0] !== undefined) size[0] = size[0] * spec.proportions[0];
                     if (spec.proportions[1] !== undefined) size[1] = size[1] * spec.proportions[1];
                 }
+
+                if (spec.differentials) {
+                    if (spec.differentials[0] !== undefined) size[0] += spec.differentials[0];
+                    if (spec.differentials[1] !== undefined) size[1] += spec.differentials[1];
+                }
+
 
                 if (parentSize) {
                     if (!align) align = origin;

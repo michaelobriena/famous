@@ -38,6 +38,7 @@ define(function(require, exports, module) {
         this._alignGetter = null;
         this._sizeGetter = null;
         this._proportionGetter = null;
+        this._differentialGetter = null;
 
         /* TODO: remove this when deprecation complete */
         this._legacyStates = {};
@@ -49,6 +50,7 @@ define(function(require, exports, module) {
             align: null,
             size: null,
             proportions: null,
+            differentials: null,
             target: null
         };
 
@@ -59,6 +61,7 @@ define(function(require, exports, module) {
             if (options.align) this.alignFrom(options.align);
             if (options.size) this.sizeFrom(options.size);
             if (options.proportions) this.proportionsFrom(options.proportions);
+            if (options.differentials) this.differentialsFrom(options.differentials);
         }
     }
 
@@ -172,6 +175,25 @@ define(function(require, exports, module) {
         }
         return this;
     };
+
+     /**
+     * Set function, object, or numerical array to provide differentials, as [+/- pixels, +/- pixels].
+     *
+     * @method differentialsFrom
+     *
+     * @param {Object} differentials provider object
+     * @return {Modifier} this
+     */
+    Modifier.prototype.differentialsFrom = function differentialsFrom(differentials) {
+        if (differentials instanceof Function) this._differentialGetter = differentials;
+        else if (differentials instanceof Object && differentials.get) this._differentialGetter = differentials.get.bind(differentials);
+        else {
+            this._differentialGetter = null;
+            this._output.differentials = differentials;
+        }
+        return this;
+    };
+
 
      /**
      * Deprecated: Prefer transformFrom with static Transform, or use a TransitionableTransform.
@@ -312,6 +334,28 @@ define(function(require, exports, module) {
         else return this.proportionsFrom(proportions);
     };
 
+    /*
+     * Deprecated: Prefer differentialsFrom with static origin array, or use a Transitionable with those differentials.
+     * @deprecated
+     * @method setDifferentials
+     * @param {Array.Number} differentials two element array of [+/- pixels, +/- pixels]
+     * @param {Transitionable} transition Valid transitionable object
+     * @param {Function} callback callback to call after transition completes
+     * @return {Modifier} this
+     */
+    Modifier.prototype.setDifferentials = function setDifferentials(differentials, transition, callback) {
+        if (differentials && (transition || this._legacyStates.differentials)) {
+            if (!this._legacyStates.differentials) {
+                this._legacyStates.differentials = new Transitionable(this._output.differentials || [0, 0]);
+            }
+            if (!this._differentialGetter) this.differentialsFrom(this._legacyStates.differentials);
+
+            this._legacyStates.differentials.set(differentials, transition, callback);
+            return this;
+        }
+        else return this.differentialsFrom(proportions);
+    };
+
     /**
      * Deprecated: Prefer to stop transform in your provider object.
      * @deprecated
@@ -324,12 +368,15 @@ define(function(require, exports, module) {
         if (this._legacyStates.align) this._legacyStates.align.halt();
         if (this._legacyStates.size) this._legacyStates.size.halt();
         if (this._legacyStates.proportions) this._legacyStates.proportions.halt();
+        if (this._legacyStates.differentials) this._legacyStates.differentials.halt();
+
         this._transformGetter = null;
         this._opacityGetter = null;
         this._originGetter = null;
         this._alignGetter = null;
         this._sizeGetter = null;
         this._proportionGetter = null;
+        this._differentialGetter = null;
     };
 
     /**
@@ -402,6 +449,17 @@ define(function(require, exports, module) {
         return this._proportionGetter ? this._proportionGetter() : this._output.proportions;
     };
 
+     /**
+     * Deprecated: Prefer to use your provided differentials or output of your differentials provider.
+     * @deprecated
+     * @method getDifferentials
+     * @return {Object} differentials provider object
+     */
+    Modifier.prototype.getDifferentials = function getDifferentials() {
+        return this._differentialGetter ? this._differentialGetter() : this._output.differentials;
+    };
+
+
     // call providers on tick to receive render spec elements to apply
     function _update() {
         if (this._transformGetter) this._output.transform = this._transformGetter();
@@ -410,6 +468,7 @@ define(function(require, exports, module) {
         if (this._alignGetter) this._output.align = this._alignGetter();
         if (this._sizeGetter) this._output.size = this._sizeGetter();
         if (this._proportionGetter) this._output.proportions = this._proportionGetter();
+        if (this._differentialGetter) this._output.differentials = this._differentialGetter();
     }
 
     /**

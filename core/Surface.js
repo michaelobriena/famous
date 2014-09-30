@@ -388,6 +388,7 @@ define(function(require, exports, module) {
                 target.style.height = (this.size && this.size[1] === true) ?  '' : this._size[1] + 'px';
             }
 
+            this._trueSizeCheck = true;
             this._eventOutput.emit('resize');
         }
 

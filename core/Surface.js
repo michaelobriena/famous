@@ -42,7 +42,7 @@ define(function(require, exports, module) {
         this._sizeDirty = true;
         this._contentDirty = true;
         this._trueSizeCheck = true;
-
+        this._cachedParentSize = null;
         this._dirtyClasses = [];
 
         if (options) this.setOptions(options);
@@ -319,6 +319,10 @@ define(function(require, exports, module) {
         if (!this._currentTarget) this.setup(context.allocator);
         var target = this._currentTarget;
         var size = context.size;
+        if (this._cachedParentSize !== size) {
+            this._sizeDirty = true;
+            this._cachedParentSize = [size[0], size[1]];
+        }
 
         if (this._classesDirty) {
             _cleanupClasses.call(this, target);

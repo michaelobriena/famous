@@ -103,11 +103,11 @@ define(function(require, exports, module) {
     };
 
     /**
-     * Generate a render spec from the contents of this component.
+     * Return the id of the component
      *
      * @private
      * @method render
-     * @return {Object} Render spec for this component
+     * @return {number} id of the SequentialLayout
      */
     SequentialLayout.prototype.render = function render() {
         return this.id;
@@ -117,8 +117,9 @@ define(function(require, exports, module) {
      * Generate a render spec from the contents of this component.
      *
      * @private
-     * @method render
-     * @return {number} Render spec for this component
+     * @method commit
+     * @param {Object} parentSpec parent render spec
+     * @return {Object} Render spec for this component
      */
     SequentialLayout.prototype.commit = function commit(parentSpec) {
         var length             = 0;

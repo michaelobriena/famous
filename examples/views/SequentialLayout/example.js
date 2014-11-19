@@ -35,12 +35,14 @@
 define(function(require, exports, module) {
     var Engine           = require("famous/core/Engine");
     var Surface          = require("famous/core/Surface");
+    var Modifier          = require("famous/core/Modifier");
+    var Transform          = require("famous/core/Transform");
     var SequentialLayout = require("famous/views/SequentialLayout");
 
     var mainContext = Engine.createContext();
 
     var sequentialLayout = new SequentialLayout({
-        direction: 1
+        direction: 0
     });
     var surfaces = [];
 
@@ -49,14 +51,18 @@ define(function(require, exports, module) {
     for (var i = 0; i < 10; i++) {
         surfaces.push(new Surface({
              content: "Surface: " + (i + 1),
-             size: [undefined, window.innerHeight/10],
+             size: [undefined, 50],
              properties: {
                  backgroundColor: "hsl(" + (i * 360 / 10) + ", 100%, 50%)",
-                 lineHeight: window.innerHeight/10 + "px",
+                 lineHeight: "50px",
                  textAlign: "center"
              }
         }));
     }
 
-    mainContext.add(sequentialLayout);
+    mainContext.add(new Modifier({
+        transform: Transform.translate(100, -100, 0),
+        origin: [0, 1],
+        align: [0, 1]
+    })).add(sequentialLayout);
 });
